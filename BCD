@@ -1,0 +1,200 @@
+//import java.util.Scanner;
+public class BCD {
+	private int[] digits;
+	int numOfDigits;
+	BCD(int[] bcdDigits){
+		digits=new int[bcdDigits.length];
+		for (int i=0; i<digits.length; i++){
+			digits[i]=bcdDigits[i];
+		}
+	}
+	BCD(int num){
+		int DIGIT;
+		DIGIT=num%10;
+		num=num/10;
+		digits=new int[1];
+		digits[0]=DIGIT;
+		while(num>0){
+			DIGIT=num%10;
+			addADigit(DIGIT);
+			num=num/10;
+		}
+	}
+	public BCD pow(int num){
+	
+			int[] arrayPow=new int[(numberOfDigits())];
+			int indexOfArrayAnswer=0;
+			for (int i=0; i<(numberOfDigits()); i++){
+				arrayPow[indexOfArrayAnswer]=nthDigit(i);
+				indexOfArrayAnswer++;
+		}
+			BCD powBCD=new BCD(arrayPow);
+			BCD numForPowBCD=new BCD(arrayPow);
+			for (int i=(num-1); i>0; i--){
+				powBCD=powBCD.multiplyBCDs(numForPowBCD);
+			}
+		return powBCD;
+	}
+	
+	public static BCD factorial(int num){
+		BCD returnThisBCD=new BCD(num);
+		for (int i=(num-1); i>0; i--){
+			BCD iBCD=new BCD(i);
+			returnThisBCD=returnThisBCD.multiplyBCDs(iBCD);
+		}
+		return returnThisBCD;
+	}
+	
+	
+	public BCD multiplyBCDs(BCD other){
+		BCD tempAnswerBCD=new BCD(0);
+		if((other.numberOfDigits()==1&&other.nthDigit(0)==0)||
+				(numberOfDigits()==1&&nthDigit(0)==0)){
+			BCD answerBCD=new BCD(0);		
+			return answerBCD;
+		}else{
+			int height=other.numberOfDigits(), width=numberOfDigits();
+			int [][] multiplying=new int [height][width];
+			int widthIndex, heightIndex,sum, ones, remaining=0,h=0,w=0;
+			int sumOfThisDiagonal,width2=width, height2=height,
+			indexOfArrayAnswer=0;
+			widthIndex=width-1;
+			heightIndex=height-1;
+			while (h<height){
+				while (w<width){
+					multiplying[h][w]=(other.nthDigit(heightIndex)
+							*nthDigit(widthIndex));
+					widthIndex--;
+					w++;
+				}
+				heightIndex--;
+				widthIndex=width-1;
+				w=0;
+				h++;	
+			}
+			while(height2==height){
+				while(width2>0){
+					sumOfThisDiagonal=diagonalSum(multiplying, 
+							width2,height2);
+					width2--;
+					sum=sumOfThisDiagonal;
+					sum=sum+remaining;
+					ones=sum%10;
+					remaining=sum/10;
+					tempAnswerBCD.addADigit(ones);
+				}
+				height2--;
+			}
+			width2=1;
+			height2=height-1;
+			while (height2>0){
+				sumOfThisDiagonal=diagonalSum(multiplying, width2,height2);
+				height2--;
+				sum=sumOfThisDiagonal;
+				sum=sum+remaining;
+				ones=sum%10;
+				remaining=sum/10;
+				tempAnswerBCD.addADigit(ones);
+
+			}
+			if(!(remaining==0))
+				tempAnswerBCD.addADigit(remaining);
+			int[] arrayAnswer=new int[(tempAnswerBCD.numberOfDigits()-1)];
+			for (int i=1; i<(tempAnswerBCD.numberOfDigits()); i++){
+				arrayAnswer[indexOfArrayAnswer]=tempAnswerBCD.nthDigit(i);
+				indexOfArrayAnswer++;
+			}
+
+			BCD answerBCD=new BCD(arrayAnswer);		
+			return answerBCD;
+		}
+	}
+	private int diagonalSum (int[][] lattice, int width, int height){
+		int totalSumOfDiagonal;
+		int h=height-1, w=width-1;
+		totalSumOfDiagonal=lattice [h][w];
+		h--;
+		w++;
+		while (w<numberOfDigits()&&h>=0){
+			totalSumOfDiagonal=totalSumOfDiagonal+lattice[h][w];
+			h--;
+			w++;
+		}
+		h--;
+		return totalSumOfDiagonal;
+	}
+	public BCD addBCDs(BCD other){
+		int[] array={};
+		BCD aBCD=new BCD(array);
+		int num=other.numberOfDigits(), num2=numberOfDigits(), 
+		numForBCD,nextDigit=0, difference;
+		difference=num2-num;
+		if (difference<0)
+			num2=num2+(difference*-1);
+		for(int i=0; i<num2; i++){
+			numForBCD=other.nthDigit(i)+nthDigit(i)+nextDigit;
+			nextDigit=numForBCD/10;
+			numForBCD=numForBCD%10;
+			aBCD.addADigit(numForBCD);
+		}
+		if (!(nextDigit==0)){
+			numForBCD=nextDigit%10;
+			aBCD.addADigit(numForBCD);
+			nextDigit=nextDigit/10;
+		}
+		return aBCD;
+	}
+	public int numberOfDigits(){
+		numOfDigits=digits.length;
+		return numOfDigits;
+	}
+	public int nthDigit(int n){
+		if (n>=digits.length){
+			n=0;
+		}else{
+			n=digits[n]; 
+		}
+		return n;
+	}
+	public void addADigit(int newdigit){
+		int[] newArray;
+		int lengthOfNewArray;
+		lengthOfNewArray=(digits.length+1);
+		newArray= new int [lengthOfNewArray];
+		for (int i=0; i<digits.length; i++){
+			newArray[i]=digits[i];
+		}
+		newArray[(lengthOfNewArray-1)]=newdigit;
+		digits=new int[lengthOfNewArray];
+		for(int i=0; i<digits.length; i++){
+			digits[i]=newArray[i];
+		}
+	}	
+	public String toString(){
+		int index,commaCount=0, comma;
+		String returnThis = "";
+		index=(digits.length-1);
+		for (int i=0; i<=index; i++){
+			comma=commaCount%3;
+			if (comma==2&&(index>i)){
+				returnThis=","+digits[i]+returnThis;
+			}else{
+				returnThis=digits[i]+returnThis;
+			}
+			commaCount++;
+		}
+		return returnThis;
+	}
+	public static void main(String str[]) {
+		int otherNum=2;
+		int num=19;
+		BCD theBCD=new BCD(num);
+		BCD other=new BCD(otherNum);
+	//	BCD newBCD = theBCD.multiplyBCDs(other);
+	//	System.out.println("Answer = '"+newBCD+"' digits:"+newBCD.numberOfDigits());
+		System.out.println("52!= "+ factorial(52));
+		System.out.println("104!= "+ factorial(104));
+		System.out.println("2^127= "+other.pow(127));
+		System.out.println("19^19= "+theBCD.pow(19));
+	}
+}
